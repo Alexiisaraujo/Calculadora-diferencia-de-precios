@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Diferencia de Precios - Supermercado Condor</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="container">
+    <header>
+      <h1>Diferencia de Precios</h1>
+    </header>
+
+    <!-- Pestañas -->
+    <nav class="tabs">
+      <button class="tab active" onclick="mostrar('calc', this)">Calculadora</button>
+      <button class="tab" onclick="mostrar('ofertas', this)">Ofertas</button>
+      <button class="tab" onclick="mostrar('kilos', this)">Diferencia en kilos</button>
+      <button class="tab" onclick="mostrar('reg', this)">Registros</button>
+    </nav>
+
+    <!-- Calculadora (original) -->
+    <section id="calc" class="content active">
+      <form id="formCalc">
+        <div class="input-group">
+          <label for="platelera">Precio actual (plat. / caja):</label>
+          <input type="number" id="platelera" step="0.01" required>
+        </div>
+
+        <div class="input-group">
+          <label for="etiqueta">Precio en etiqueta:</label>
+          <input type="number" id="etiqueta" step="0.01" required>
+        </div>
+
+        <div class="input-group cantidad">
+          <label for="cantidad">Cantidad:</label>
+          <input type="number" id="cantidad" value="1" step="1" min="1" required>
+          <select id="unidad">
+            <option value="unidad">unidades</option>
+            <option value="kg">kg</option>
+          </select>
+        </div>
+
+        <!-- PDV / Operador / Producto / Observación para registrar -->
+        <div class="input-row">
+          <div class="input-small">
+            <label for="pdv_calc">PDV (101-123):</label>
+            <input type="text" id="pdv_calc" placeholder="Opcional">
+          </div>
+          <div class="input-small">
+            <label for="operador_calc">Operador:</label>
+            <input type="text" id="operador_calc" placeholder="Opcional">
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="producto_calc">Producto:</label>
+          <input type="text" id="producto_calc" placeholder="Opcional">
+        </div>
+
+        <div class="input-group">
+          <label for="observacion_calc">Observación:</label>
+          <input type="text" id="observacion_calc" placeholder="Opcional">
+        </div>
+
+        <div class="input-group">
+          <button type="button" onclick="calcular()">Calcular</button>
+        </div>
+
+        <div id="resultado" class="resultado"></div>
+
+        <div class="input-group">
+          <button type="button" onclick="registrarDesde('calculadora')">Registrar diferencia</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Ofertas -->
+    <section id="ofertas" class="content">
+      <form id="formOfertas">
+        <div class="input-group">
+          <label for="precio_oferta">Precio unitario (R$):</label>
+          <input type="number" id="precio_oferta" step="0.01" placeholder="Ej: 10">
+        </div>
+
+        <div class="input-group">
+          <label for="oferta_tipo">Tipo de oferta (predefinida / personalizada):</label>
+          <select id="oferta_tipo">
+            <option value="predef">Predefinida</option>
+            <option value="custom">Personalizada (Lleva X paga Y)</option>
+            <option value="nthpct">Descuento en N-ésima unidad (%)</option>
+          </select>
+        </div>
+
+        <div id="predef_block" class="input-group">
+          <label for="predef">Predefinidas:</label>
+          <select id="predef">
+            <option value="ninguna">-- Seleccionar --</option>
+            <option value="3x2">Lleve 3, pague 2</option>
+            <option value="4x3">Lleve 4, pague 3</option>
+            <option value="4x2">Lleve 4, pague 2</option>
+            <option value="2x50">2ª unidad 50% off</option>
+            <option value="2x20">Lleve 2, 20% off total</option>
+          </select>
+        </div>
+
+        <div id="custom_block" class="input-group hidden">
+          <div class="input-row">
+            <div class="input-small">
+              <label for="lleva_x">Lleva (X):</label>
+              <input type="number" id="lleva_x" min="1" step="1" value="3">
+            </div>
+            <div class="input-small">
+              <label for="paga_y">Paga (Y):</label>
+              <input type="number" id="paga_y" min="0" step="1" value="2">
+            </div>
+          </div>
+        </div>
+
+        <div id="nth_block" class="input-group hidden">
+          <div class="input-row">
+            <div class="input-small">
+              <label for="nth_n">Unidad N (ej: 2 -> segunda):</label>
+              <input type="number" id="nth_n" min="1" step="1" value="2">
+            </div>
+            <div class="input-small">
+              <label for="nth_pct">Descuento % (ej: 50):</label>
+              <input type="number" id="nth_pct" min="0" max="100" step="1" value="50">
+            </div>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="oferta_qty">¿Cuántas unidades toma el cliente? (para calcular el total real):</label>
+          <input type="number" id="oferta_qty" min="1" step="1" value="3">
+        </div>
+
+        <!-- PDV/Operador/Producto/Observación -->
+        <div class="input-row">
+          <div class="input-small">
+            <label for="pdv_oferta">PDV:</label>
+            <input type="text" id="pdv_oferta" placeholder="Opcional">
+          </div>
+          <div class="input-small">
+            <label for="operador_oferta">Operador:</label>
+            <input type="text" id="operador_oferta" placeholder="Opcional">
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="producto_oferta">Producto:</label>
+          <input type="text" id="producto_oferta" placeholder="Opcional">
+        </div>
+
+        <div class="input-group">
+          <label for="observacion_oferta">Observación:</label>
+          <input type="text" id="observacion_oferta" placeholder="Opcional">
+        </div>
+
+        <div class="input-group">
+          <button type="button" onclick="calcularOferta()">Calcular oferta</button>
+        </div>
+
+        <div id="resultado_oferta" class="resultado"></div>
+
+        <div class="input-group">
+          <button type="button" onclick="registrarDesde('ofertas')">Registrar oferta</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Diferencia en kilos -->
+    <section id="kilos" class="content">
+      <form id="formKilos">
+        <div class="input-group">
+          <label for="peso">Peso (kg):</label>
+          <input type="number" id="peso" step="0.0001" placeholder="Ej: 0.581">
+        </div>
+
+        <div class="input-group">
+          <label for="precio_etiqueta_total">Precio mostrado en etiqueta (total R$):</label>
+          <input type="number" id="precio_etiqueta_total" step="0.01" placeholder="Ej: 5.81">
+        </div>
+
+        <div class="input-group">
+          <label for="kilo_platelera">Precio por kilo en platelera (R$ / kg):</label>
+          <input type="number" id="kilo_platelera" step="0.01" placeholder="Ej: 8.00">
+        </div>
+
+        <!-- PDV/Operador/Producto/Observación -->
+        <div class="input-row">
+          <div class="input-small">
+            <label for="pdv_kilos">PDV:</label>
+            <input type="text" id="pdv_kilos" placeholder="Opcional">
+          </div>
+          <div class="input-small">
+            <label for="operador_kilos">Operador:</label>
+            <input type="text" id="operador_kilos" placeholder="Opcional">
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="producto_kilos">Producto:</label>
+          <input type="text" id="producto_kilos" placeholder="Opcional">
+        </div>
+
+        <div class="input-group">
+          <label for="observacion_kilos">Observación:</label>
+          <input type="text" id="observacion_kilos" placeholder="Opcional">
+        </div>
+
+        <div class="input-group">
+          <button type="button" onclick="calcularKilos()">Calcular diferencia en kilos</button>
+        </div>
+
+        <div id="resultado_kilos" class="resultado"></div>
+
+        <div class="input-group">
+          <button type="button" onclick="registrarDesde('kilos')">Registrar diferencia (kilos)</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Registros -->
+    <section id="reg" class="content">
+      <div class="registro-header">
+        <input type="date" id="filtroFecha">
+        <button class="borrar-todo" onclick="borrarTodo()">🗑️ Borrar todo</button>
+      </div>
+      <table id="tablaRegistros">
+        <thead>
+          <tr>
+            <th>Fecha y hora</th>
+            <th>Tipo</th>
+            <th>PDV</th>
+            <th>Operador</th>
+            <th>Producto</th>
+            <th>Resultado</th>
+            <th>Observación</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
